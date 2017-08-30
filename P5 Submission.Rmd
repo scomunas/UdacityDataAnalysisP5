@@ -1,0 +1,289 @@
+---
+title: "P5 Submission"
+author: "Sergio Comuñas"
+date: "30 de agosto de 2017"
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+library(ggplot2)
+library(dplyr)
+library(knitr)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+setwd("C:/OneDrive/Perfil/Documentos/Proyectos/2017-08 Data Analyst Nanodegree (udacity)/P5 Exploratory Data Analysis/Project")
+redwine <- read.csv("WineQualityRed.csv", stringsAsFactors = FALSE)
+```
+
+I've chosen Red Wine Quality dataset because here in Spain there's a lot of good
+wines and it's interesting for me.
+
+In the "WineQualityRedDescription.txt" file you can see the dataset description.
+
+# Univariate Plots Section
+
+We can observe the dimensions of the dataset:
+
+```{r echo=FALSE, Dimensions}
+cat(length(redwine$X), "rows and", length(redwine), "features")
+```
+
+Also we can view a short summary in terms of each feature and the numbering
+values of it:
+
+```{r echo=FALSE, Summary}
+str(redwine)
+summary(redwine)
+```
+
+The first feature I'm interested in is "Quality" that gives us the wine score
+between 0 and 10):
+
+```{r echo=FALSE, HistQuality}
+qplot(redwine$quality, geom="histogram", binwidth = 1) +
+ggtitle("Quality Feature Distribution") +
+xlab("Quality (1-10)") +
+ylab("Number of instances")
+```
+
+The next one gives us a vision about alcohol density:
+
+```{r echo=FALSE, HistAlcohol}
+qplot(redwine$alcohol, geom="histogram", binwidth = 0.1) +
+ggtitle("Alcohol Feature Distribution") +
+xlab("Alcohol (%)") +
+ylab("Number of instances")
+```
+
+Also I want to take a look to the sulphates feature because here in my house
+always have discussion about the quantity of each one:
+
+```{r echo=FALSE, HistSulphates}
+qplot(redwine$sulphates, geom="histogram", binwidth = 0.03) +
+ggtitle("Sulphates Feature Distribution") +
+xlab("Sulphates (%)") +
+ylab("Number of instances")
+```
+
+# Univariate Analysis
+
+This dataset is structured as a punctuation table for a list of about 1200 wines
+anb his relationed features.
+
+For me the main feature is quality. In most of the cases quality must converge
+in a combination of other features to give most feeling to the wine.
+
+Other variables in this dataset are the ones reliable to reality. The
+ones that every people can feel driking the wine. Then: Acidity, Residual Sugar,
+Chlorides, Sulfur Dioxide, Density, pH, Sulphates and Alcohol.
+
+I've simplified the dataset creating total.acidity (sum of the three features)
+and removing free Sulfur Dioxide feature (taking in consideration only Total SD 
+feature).
+
+Again there's a median detail about each feature:
+
+```{r echo=FALSE, NewFeatures}
+redwine$acidity = redwine$fixed.acidity + redwine$volatile.acidity + 
+    redwine$citric.acid
+redwineClean = redwine[, c("X", "quality", "acidity", "residual.sugar", 
+                           "chlorides", "total.sulfur.dioxide", "density", 
+                           "pH", "sulphates", "alcohol")]
+
+summary(redwineClean)
+```
+
+
+# Bivariate Plots Section
+
+First of all I want to see relation between quality and the most important 
+features.
+
+Here we can see relation between quality and alcohol:
+
+```{r echo=FALSE, PlotAlcohol}
+ggplot(aes(quality, alcohol, group = quality), data = redwine) + geom_boxplot()+
+ggtitle("Quality vs Alcohol") +
+xlab("Quality") +
+ylab("Alcohol (%)")
+```
+
+Another plot we can observe is quality vs acidity because in red wines acidity
+is relationed with bad ones:
+
+```{r echo=FALSE, PlotAcidity}
+ggplot(aes(quality, acidity, group = quality), data = redwine) + geom_boxplot()+
+ggtitle("Quality vs Acidity") +
+xlab("Quality") +
+ylab("Acidity")
+```
+
+The last relation I want to observe is Sugar vs alcohol. I've heard from child
+that sugar is the ones come to alcohol after fermentation. Then, mainly the 
+less sugar remaining would become more alcohol. Let's see:
+
+```{r echo=FALSE, PlotSugar}
+ggplot(aes(residual.sugar, alcohol), data = redwine) + geom_point() +
+ggtitle("Residual Sugar vs Alcohol") +
+xlab("Residual Sugar (grams/liter)") +
+ylab("Alcohol (%)")
+```
+
+
+# Bivariate Analysis
+
+We can do a first approach of the mean of each feature for every punctuation in
+quality:
+
+```{r echo=FALSE, TableDatabyQuality}
+DataByQuality = aggregate(redwineClean[, 2:10], by = list(redwineClean$quality), 
+                          FUN = "mean")[, 2:10]
+kable(DataByQuality, digits = 3, col.names = c("Quality", "Acidity", 
+                                               "Residual Sugar", "Chlorides", 
+                                               "Sulfur Dioxide", "Density", 
+                                               "pH", "Sulphates", "Alcohol"))
+```
+
+As you can see:
+- There's a strong relation between alcohol and quality but not as I expected:
+for more alcohol more quality (in approx)
+- There's no relation between acidity and quality
+- It's not true about less sugar more alcohol. Maybe there's rain types with
+more sugar in origin??
+
+
+# Multivariate Plots Section
+
+
+> **Tip**: Now it's time to put everything together. Based on what you found in
+the bivariate plots section, create a few multivariate plots to investigate
+more complex interactions between variables. Make sure that the plots that you
+create here are justified by the plots you explored in the previous section. If
+you plan on creating any mathematical models, this is the section where you
+will do that.
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+First of all come again with the strong relation we have: quality vs alcohol. In
+this case we add sulphates feature in order to see if increases the correlation.
+
+Here you can see the plot:
+
+```{r echo=FALSE, PlotAlcoholSulphates}
+ggplot(aes(quality, alcohol, alpha = sulphates), data = redwine) + geom_point()+
+ggtitle("Residual Sugar vs Alcohol vs Sulphates") +
+xlab("Residual Sugar (grams/liter)") +
+ylab("Alcohol (%)") +
+labs(alpha = "Sulphates")
+```
+
+You can see there's no apparent relation for sulphates. Only can observe there's
+extreme low sulphates rate on better and on poor wines. I suspect high quality
+wines there's no sulphates because of they think on better quality rates and in
+lower quality wines because they want not to spent so much in order to have
+affordable bottles.
+
+We can do something similar but taking in density feature instead sulphates:
+
+```{r echo=FALSE, PlotAlcoholDensity}
+ggplot(aes(quality, alcohol, alpha = density), data = redwine) + geom_point() +
+ggtitle("Residual Sugar vs Alcohol vs Density") +
+xlab("Residual Sugar (grams/liter)") +
+ylab("Alcohol (%)") +
+labs(alpha = "Density")
+```
+
+You can see there's a relation between density and quality. All of the High
+Class Wines have low density rate. There is not so strong relation as alcohol
+but thinking on a future prediction model (for example) is sure it's a feature
+to include.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+qplot(redwine$quality, geom="histogram", binwidth = 1) +
+ggtitle("Quality Feature Distribution") +
+xlab("Quality (1-10)") +
+ylab("Number of instances")
+```
+
+### Description One
+
+First one is the Quality distribution plot. For me is so interesting in terms
+that have a near normal distribution. You can see there's a lot mid-market wines
+and a poor high class wines. Also you can see there's a little growing on the 
+right. I think it must be related to there's so few bad wines but also few great
+ones.
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+ggplot(aes(residual.sugar, alcohol), data = redwine) + geom_point() +
+ggtitle("Residual Sugar vs Alcohol") +
+xlab("Residual Sugar (grams/liter)") +
+ylab("Alcohol (%)")
+```
+
+### Description Two
+
+This one is so special for me because it crashes a family theory I've heard for
+years. The more sweet wine the more alcohol you have. It's clearly not true
+because no clear relation between the two features.
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+ggplot(aes(quality, alcohol, alpha = density), data = redwine) + geom_point() +
+ggtitle("Residual Sugar vs Alcohol vs Density") +
+xlab("Residual Sugar (grams/liter)") +
+ylab("Alcohol (%)") +
+labs(alpha = "Density")
+```
+
+### Description Three
+
+I've selected this one because clearly shows us the relation between alcohol and
+quality but also shows us that there is a lot of range for mid market wines.
+There's a strong relation but not enough to ensure high alcohol wines are
+better.
+
+Also you can see there's a significan low density wines for High Class ones.
+This may be useful for a stronger analysis.
+
+------
+
+# Reflection
+
+There's a lot of wine classes, this is not new. The most of them are mid-market
+ones. It's not clear for have an strong model to predict if a wine will be good
+or not. Here in Spain the wine people thell us that it's not science, it's a 
+culture process. I'm not sure about that but with that data can conclude it
+would not be easy to define the relation.
+
+For me the next steps would be investigate the correlation for quality vs the 
+rest of the features. Maybe would star with a ggpairs plot or something similar
+to include more mathematics and try to model the strong relations.
+
+In the top of my thougs would be great to have a model that can predict quality
+for the wine in terms of prediction. Most of wine people can predict: acidity, 
+sulphates entered, etc. They will be crazy if can predict income for every year
+and Marketing actions to be done...
