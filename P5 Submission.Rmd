@@ -4,6 +4,10 @@ author: "Sergio Comuñas"
 date: "30 de agosto de 2017"
 output: html_document
 ---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using in your analysis in this code
@@ -326,6 +330,7 @@ Here you can see the plot:
 ```{r echo=FALSE, PlotAlcoholSulphates}
 ggplot(aes(alcohol, sulphates, color = factor(quality)), data = redwineClean) +
 geom_smooth()  +
+scale_colour_brewer(type = "seq", palette = 'YlOrRd', direction = 1) +
 ggtitle("Quality vs Alcohol vs Sulphates") +
 xlab("Alcohol (%)") +
 ylab("Sulphates") +
@@ -346,6 +351,7 @@ We can do something similar but taking in density feature instead sulphates:
 ```{r echo=FALSE, PlotAlcoholDensity}
 ggplot(aes(alcohol, density, color = factor(quality)), data = redwineClean) +
 geom_smooth()  +
+scale_colour_brewer(type = "seq", palette = 'YlOrRd', direction = 1) +
 ggtitle("Quality vs Alcohol vs Density") +
 xlab("Alcohol (%)") +
 ylab("Density") +
@@ -396,6 +402,7 @@ because no clear relation between the two features.
 ```{r echo=FALSE, Plot_Three}
 ggplot(aes(alcohol, sulphates, color = factor(quality)), data = redwineClean) +
 geom_smooth()  +
+scale_colour_brewer(type = "seq", palette = 'YlOrRd', direction = 1) +
 ggtitle("Quality vs Alcohol vs Sulphates") +
 xlab("Alcohol (%)") +
 ylab("Sulphates") +
