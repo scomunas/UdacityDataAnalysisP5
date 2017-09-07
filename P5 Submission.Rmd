@@ -21,6 +21,7 @@ output: html_document
 library(ggplot2)
 library(dplyr)
 library(knitr)
+library(GGally)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
@@ -54,11 +55,13 @@ The first feature I'm interested in is "Quality" that gives us the wine score
 between 0 and 10):
 
 ```{r echo=FALSE, HistQuality}
-qplot(redwine$quality, geom="histogram", binwidth = 1) +
+qplot(factor(redwine$quality), geom="bar") +
 ggtitle("Quality Feature Distribution") +
 xlab("Quality (1-10)") +
 ylab("Number of instances")
 ```
+
+You can see is centered on mid quality wines (5 and 6).
 
 The next one gives us a vision about alcohol density:
 
@@ -69,6 +72,8 @@ xlab("Alcohol (%)") +
 ylab("Number of instances")
 ```
 
+Alcohol is right handed about 7% but there is a great variety until 14%.
+
 Also I want to take a look to the sulphates feature because here in my house
 always have discussion about the quantity of each one:
 
@@ -78,6 +83,116 @@ ggtitle("Sulphates Feature Distribution") +
 xlab("Sulphates (%)") +
 ylab("Number of instances")
 ```
+
+Sulphates are low right handed normal distribution over 0.6. See that there are
+so right stella in the graph. If we need can consider values over 1.5 as 
+outliers.
+
+Here is the distribution for Fixed Acidity:
+
+```{r echo=FALSE, HistAcidity1}
+qplot(redwine$fixed.acidity, geom="histogram", binwidth = 0.3) +
+ggtitle("Fixed Acidity Feature Distribution") +
+xlab("Fixed Acidity") +
+ylab("Number of instances")
+```
+
+Fixed Acidity is low right handed normal distribution over 8.
+
+Here is the distribution for Volatile Acidity:
+
+```{r echo=FALSE, HistAcidity2}
+qplot(redwine$volatile.acidity, geom="histogram", binwidth = 0.03) +
+ggtitle("Volatile Acidity Feature Distribution") +
+xlab("Volatile Acidity") +
+ylab("Number of instances")
+```
+
+Volatile Acidity is normal distribution over 0.5. Has several peaks on 0.4 and
+0.7.
+
+Here is the distribution for Citric Acidity:
+
+```{r echo=FALSE, HistAcidity3}
+qplot(redwine$citric.acid, geom="histogram", binwidth = 0.02) +
+ggtitle("Citric Acidity Feature Distribution") +
+xlab("Citric Acidity") +
+ylab("Number of instances")
+```
+
+Citric Acidity has no clear distribution.
+
+Here is the distribution for Residual Sugar:
+
+```{r echo=FALSE, HistSugar}
+qplot(redwine$residual.sugar, geom="histogram", binwidth = 0.3) +
+ggtitle("Residual Sugar Feature Distribution") +
+xlab("Residual Sugar") +
+ylab("Number of instances")
+```
+
+Fixed Acidity is low right handed normal distribution over 2. See that there are
+so right stella in the graph. If we need can consider values over 8 as outliers
+.
+
+Here is the distribution for Chlorides:
+
+```{r echo=FALSE, HistChlorides}
+qplot(redwine$chlorides, geom="histogram", binwidth = 0.01) +
+ggtitle("Chlorides Feature Distribution") +
+xlab("Chlorides") +
+ylab("Number of instances")
+```
+
+Fixed Acidity is normal distribution over 0.05. See that there are
+so right stella in the graph. If we need can consider values over 0.3 as 
+outliers.
+
+Here is the distribution for Free Sulfur Dioxide:
+
+```{r echo=FALSE, HistDioxide1}
+qplot(redwine$free.sulfur.dioxide, geom="histogram", binwidth = 1) +
+ggtitle("Free Sulfur Dioxide Feature Distribution") +
+xlab("Sulfur Dioxide") +
+ylab("Number of instances")
+```
+
+Free Sulfur Dioxide has no clear distribution.
+
+Here is the distribution for Total Sulfur Dioxide:
+
+```{r echo=FALSE, HistDioxide2}
+qplot(redwine$total.sulfur.dioxide, geom="histogram", binwidth = 5) +
+ggtitle("Total Sulfur Dioxide Feature Distribution") +
+xlab("Sulfur Dioxide") +
+ylab("Number of instances")
+```
+
+Total Sulfur Dioxide is low right handed normal distribution over 25.
+
+Here is the distribution for Density:
+
+```{r echo=FALSE, HistDensity}
+qplot(redwine$density, geom="histogram", binwidth = 0.0002) +
+ggtitle("Density Feature Distribution") +
+xlab("Density") +
+ylab("Number of instances")
+```
+
+Density is normal distribution over 0.996. It is low separation values, maybe
+would be great idea to scale this feature.
+
+Here is the distribution for pH:
+
+```{r echo=FALSE, HistpH}
+qplot(redwine$pH, geom="histogram", binwidth = 0.03) +
+ggtitle("pH Feature Distribution") +
+xlab("pH") +
+ylab("Number of instances")
+```
+
+Fixed Acidity is normal distribution over 3.3. It is low separation values, 
+maybe would be great idea to scale this feature.
 
 # Univariate Analysis
 
@@ -93,51 +208,83 @@ Chlorides, Sulfur Dioxide, Density, pH, Sulphates and Alcohol.
 
 I've simplified the dataset creating total.acidity (sum of the three features)
 and removing free Sulfur Dioxide feature (taking in consideration only Total SD 
-feature).
+feature). As you can see have similar distributions.
 
 Again there's a median detail about each feature:
 
 ```{r echo=FALSE, NewFeatures}
 redwine$acidity = redwine$fixed.acidity + redwine$volatile.acidity + 
     redwine$citric.acid
-redwineClean = redwine[, c("X", "quality", "acidity", "residual.sugar", 
+redwineClean = redwine[, c("quality", "acidity", "residual.sugar", 
                            "chlorides", "total.sulfur.dioxide", "density", 
                            "pH", "sulphates", "alcohol")]
 
 summary(redwineClean)
 ```
 
+The last thing you can observe is that there are clear outliers for: Sulphates,
+Residual Sugar, Chloride and Sulfur Dioxide.
 
 # Bivariate Plots Section
 
-First of all I want to see relation between quality and the most important 
-features.
+First of all I want to see correlation for all the features:
+```{r echo=FALSE, Correlation}
+ggcorr(redwineClean, label = TRUE, label_size = 3, label_round = 2, 
+       label_alpha = TRUE, method = c("everything","pearson")) +
+ggtitle("Correlation Matrix") 
+```
 
-Here we can see relation between quality and alcohol:
+As you can see strongest correlation with quality is for alcohol feature. Here 
+we can see relation between quality and alcohol:
 
 ```{r echo=FALSE, PlotAlcohol}
-ggplot(aes(quality, alcohol, group = quality), data = redwine) + geom_boxplot()+
+ggplot(aes(factor(quality), alcohol), data = redwineClean) + 
+geom_boxplot() +
 ggtitle("Quality vs Alcohol") +
 xlab("Quality") +
 ylab("Alcohol (%)")
 ```
 
-Another plot we can observe is quality vs acidity because in red wines acidity
-is relationed with bad ones:
+Another relative quality correlation seen is with sulphates:
 
-```{r echo=FALSE, PlotAcidity}
-ggplot(aes(quality, acidity, group = quality), data = redwine) + geom_boxplot()+
-ggtitle("Quality vs Acidity") +
+```{r echo=FALSE, PlotSulphates}
+ggplot(aes(factor(quality), sulphates), data = redwineClean) + 
+geom_boxplot() +
+ggtitle("Quality vs Sulphates") +
 xlab("Quality") +
-ylab("Acidity")
+ylab("Sulphates")
+```
+
+The strongest relation you can observe is acidity vs density and acidity vs pH.
+Let's see:
+
+```{r echo=FALSE, PlotAciditivsDensity}
+ggplot(aes(acidity, density), data = redwineClean) + 
+geom_point(alpha = 1/10) +
+geom_smooth(method='lm') +
+ggtitle("Acidity vs Density") +
+xlab("Acidity") +
+ylab("Density")
+```
+
+```{r echo=FALSE, PlotAciditivspH}
+ggplot(aes(acidity, pH), data = redwineClean) + 
+geom_point(alpha = 1/10) +
+geom_smooth(method='lm') +
+ggtitle("Acidity vs pH") +
+xlab("Acidity") +
+ylab("pH")
 ```
 
 The last relation I want to observe is Sugar vs alcohol. I've heard from child
 that sugar is the ones come to alcohol after fermentation. Then, mainly the 
-less sugar remaining would become more alcohol. Let's see:
+less sugar remaining would become more alcohol. I take out values considered
+outliers for Residual Sugar on Univariate Analysis. Let's see:
 
 ```{r echo=FALSE, PlotSugar}
-ggplot(aes(residual.sugar, alcohol), data = redwine) + geom_point() +
+redwineRSOut = subset(redwineClean, redwineClean$residual.sugar < 8)
+ggplot(aes(residual.sugar, alcohol), data = redwineRSOut) + 
+geom_point(alpha = 1/10)+
 ggtitle("Residual Sugar vs Alcohol") +
 xlab("Residual Sugar (grams/liter)") +
 ylab("Alcohol (%)")
@@ -150,9 +297,9 @@ We can do a first approach of the mean of each feature for every punctuation in
 quality:
 
 ```{r echo=FALSE, TableDatabyQuality}
-DataByQuality = aggregate(redwineClean[, 2:10], by = list(redwineClean$quality), 
-                          FUN = "mean")[, 2:10]
-kable(DataByQuality, digits = 3, col.names = c("Quality", "Acidity", 
+DataByQuality = aggregate(redwineClean, by = list(redwineClean$quality), 
+                          FUN = "mean")
+kable(DataByQuality, digits = 3, col.names = c("Index", "Quality", "Acidity", 
                                                "Residual Sugar", "Chlorides", 
                                                "Sulfur Dioxide", "Density", 
                                                "pH", "Sulphates", "Alcohol"))
@@ -161,26 +308,15 @@ kable(DataByQuality, digits = 3, col.names = c("Quality", "Acidity",
 As you can see:
 - There's a strong relation between alcohol and quality but not as I expected:
 for more alcohol more quality (in approx)
+- Also there's a strong relation between acidity and density and between acidity
+and pH (it's normal: more acidity less pH and more acidity normally in wine more
+density)
 - There's no relation between acidity and quality
 - It's not true about less sugar more alcohol. Maybe there's rain types with
 more sugar in origin??
 
 
-# Multivariate Plots Section
-
-
-> **Tip**: Now it's time to put everything together. Based on what you found in
-the bivariate plots section, create a few multivariate plots to investigate
-more complex interactions between variables. Make sure that the plots that you
-create here are justified by the plots you explored in the previous section. If
-you plan on creating any mathematical models, this is the section where you
-will do that.
-
-```{r echo=FALSE, Multivariate_Plots}
-
-```
-
-# Multivariate Analysis
+# Multivariate Plots and Analysis
 
 First of all come again with the strong relation we have: quality vs alcohol. In
 this case we add sulphates feature in order to see if increases the correlation.
@@ -188,11 +324,12 @@ this case we add sulphates feature in order to see if increases the correlation.
 Here you can see the plot:
 
 ```{r echo=FALSE, PlotAlcoholSulphates}
-ggplot(aes(quality, alcohol, alpha = sulphates), data = redwine) + geom_point()+
-ggtitle("Residual Sugar vs Alcohol vs Sulphates") +
-xlab("Residual Sugar (grams/liter)") +
-ylab("Alcohol (%)") +
-labs(alpha = "Sulphates")
+ggplot(aes(alcohol, sulphates, color = factor(quality)), data = redwineClean) +
+geom_smooth()  +
+ggtitle("Quality vs Alcohol vs Sulphates") +
+xlab("Alcohol (%)") +
+ylab("Sulphates") +
+labs(color = "Quality")
 ```
 
 You can see there's no apparent relation for sulphates. Only can observe there's
@@ -201,14 +338,18 @@ wines there's no sulphates because of they think on better quality rates and in
 lower quality wines because they want not to spent so much in order to have
 affordable bottles.
 
+Also we can see removing outliers in Sulphates feature maybe we would have a
+more clear correlation.
+
 We can do something similar but taking in density feature instead sulphates:
 
 ```{r echo=FALSE, PlotAlcoholDensity}
-ggplot(aes(quality, alcohol, alpha = density), data = redwine) + geom_point() +
-ggtitle("Residual Sugar vs Alcohol vs Density") +
-xlab("Residual Sugar (grams/liter)") +
-ylab("Alcohol (%)") +
-labs(alpha = "Density")
+ggplot(aes(alcohol, density, color = factor(quality)), data = redwineClean) +
+geom_smooth()  +
+ggtitle("Quality vs Alcohol vs Density") +
+xlab("Alcohol (%)") +
+ylab("Density") +
+labs(color = "Quality")
 ```
 
 You can see there's a relation between density and quality. All of the High
@@ -222,7 +363,7 @@ to include.
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
-qplot(redwine$quality, geom="histogram", binwidth = 1) +
+qplot(factor(redwine$quality), geom="bar") +
 ggtitle("Quality Feature Distribution") +
 xlab("Quality (1-10)") +
 ylab("Number of instances")
@@ -238,7 +379,8 @@ ones.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-ggplot(aes(residual.sugar, alcohol), data = redwine) + geom_point() +
+ggplot(aes(residual.sugar, alcohol), data = redwineRSOut) + 
+geom_point(alpha = 1/10)+
 ggtitle("Residual Sugar vs Alcohol") +
 xlab("Residual Sugar (grams/liter)") +
 ylab("Alcohol (%)")
@@ -252,11 +394,12 @@ because no clear relation between the two features.
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
-ggplot(aes(quality, alcohol, alpha = density), data = redwine) + geom_point() +
-ggtitle("Residual Sugar vs Alcohol vs Density") +
-xlab("Residual Sugar (grams/liter)") +
-ylab("Alcohol (%)") +
-labs(alpha = "Density")
+ggplot(aes(alcohol, sulphates, color = factor(quality)), data = redwineClean) +
+geom_smooth()  +
+ggtitle("Quality vs Alcohol vs Sulphates") +
+xlab("Alcohol (%)") +
+ylab("Sulphates") +
+labs(color = "Quality")
 ```
 
 ### Description Three
@@ -266,7 +409,7 @@ quality but also shows us that there is a lot of range for mid market wines.
 There's a strong relation but not enough to ensure high alcohol wines are
 better.
 
-Also you can see there's a significan low density wines for High Class ones.
+Also you can see there's a significant low density wines for High Class ones.
 This may be useful for a stronger analysis.
 
 ------
@@ -279,11 +422,13 @@ or not. Here in Spain the wine people thell us that it's not science, it's a
 culture process. I'm not sure about that but with that data can conclude it
 would not be easy to define the relation.
 
-For me the next steps would be investigate the correlation for quality vs the 
-rest of the features. Maybe would star with a ggpairs plot or something similar
-to include more mathematics and try to model the strong relations.
+It was harder for me to see a plot of all features and reflection about each
+one. Also to think about relations within all of them. Finally I center my
+effort in do a separate analisys: univariate only for see variable distributions
+and outliers and multivariate thinking on real life what kind of parameters
+may have real relation.
 
-In the top of my thougs would be great to have a model that can predict quality
+For me next steps would be to create a model that can predict quality
 for the wine in terms of prediction. Most of wine people can predict: acidity, 
 sulphates entered, etc. They will be crazy if can predict income for every year
 and Marketing actions to be done...
